@@ -1510,8 +1510,12 @@ mrb_str_hash(mrb_state *mrb, mrb_value str)
 static mrb_value
 mrb_str_hash_m(mrb_state *mrb, mrb_value self)
 {
+#ifdef MRUBY_SYMBEX
+  return mrb_fixnum_value(0);
+#else
   mrb_int key = mrb_str_hash(mrb, self);
   return mrb_fixnum_value(key);
+#endif
 }
 
 /* 15.2.10.5.21 */

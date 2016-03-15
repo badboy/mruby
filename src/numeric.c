@@ -281,6 +281,9 @@ flo_eq(mrb_state *mrb, mrb_value x)
 static mrb_value
 flo_hash(mrb_state *mrb, mrb_value num)
 {
+#ifdef MRUBY_SYMBEX
+  return mrb_fixnum_value(0);
+#else
   mrb_float d;
   char *c;
   size_t i;
@@ -295,6 +298,7 @@ flo_hash(mrb_state *mrb, mrb_value num)
   }
   if (hash < 0) hash = -hash;
   return mrb_fixnum_value(hash);
+#endif
 }
 
 /* 15.2.9.3.13 */
