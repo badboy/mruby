@@ -17,6 +17,7 @@
 #include <mruby/variable.h>
 #include <mruby/gc.h>
 #include <mruby/error.h>
+#include <s2e.h>
 
 /*
   = Tri-color Incremental Garbage Collection
@@ -65,7 +66,7 @@
 
   mruby implementer and C extension library writer must insert a write
   barrier when updating a reference from a field of an object.
-  When updating a reference from a field of object A to object B, 
+  When updating a reference from a field of object A to object B,
   two different types of write barrier are available:
 
     * mrb_field_write_barrier - target B object for a mark.
@@ -198,7 +199,16 @@ mrb_realloc_simple(mrb_state *mrb, void *p,  size_t len)
 {
   void *p2;
 
-  p2 = (mrb->allocf)(mrb, p, len, mrb->allocf_ud);
+#ifdef MRUBY_SYMBEX
+  if (s2e_is_symbolic(&len, sizeof(len))) {
+      size_t upper_size = s2e_get_upper_bound(len);
+      p2 = (mrb->allocf)(mrb, p, upper_size, mrb->allocf_ud);
+  } else {
+#endif
+      p2 = (mrb->allocf)(mrb, p, len, mrb->allocf_ud);
+#ifdef MRUBY_SYMBEX
+  }
+#endif
   if (!p2 && len > 0 && mrb->gc.heaps) {
     mrb_full_gc(mrb);
     p2 = (mrb->allocf)(mrb, p, len, mrb->allocf_ud);
