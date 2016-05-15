@@ -24,8 +24,8 @@
 
 #ifdef MRUBY_SYMBEX
 
+#include <symbex.h>
 #include <mruby/opcode_names.h>
-#include <s2e.h>
 
 #define _SYMBEX_TRACE_SIZE   1
 
@@ -851,7 +851,7 @@ RETRY_TRY_BLOCK:
 #ifdef MRUBY_SYMBEX
   INIT_DISPATCH({
       report_trace(i);
-      printf("DISPATCH. OPCODE i=%d, name=%s\n", GET_OPCODE(i), opcode_names[GET_OPCODE(i)]);
+      printf("DISPATCH. pc=%d, OPCODE=%d, name=%s\n", i, GET_OPCODE(i), opcode_names[GET_OPCODE(i)]);
   }) {
 #else
   INIT_DISPATCH {

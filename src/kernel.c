@@ -459,7 +459,7 @@ mrb_obj_extend_m(mrb_state *mrb, mrb_value self)
 MRB_API mrb_value
 mrb_obj_hash(mrb_state *mrb, mrb_value self)
 {
-#ifdef MRUBY_SYMBEX
+#ifdef SYMBEX_HASH_NEUTRAL
   return mrb_fixnum_value(0);
 #else
   return mrb_fixnum_value(mrb_obj_id(self));

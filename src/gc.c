@@ -17,7 +17,7 @@
 #include <mruby/variable.h>
 #include <mruby/gc.h>
 #include <mruby/error.h>
-#include <s2e.h>
+#include <symbex.h>
 
 /*
   = Tri-color Incremental Garbage Collection
@@ -198,20 +198,22 @@ MRB_API void*
 mrb_realloc_simple(mrb_state *mrb, void *p,  size_t len)
 {
   void *p2;
+  size_t upper_size;
 
-#ifdef MRUBY_SYMBEX
+#ifdef SYMBEX_BUFFER_CONCRETE
   if (s2e_is_symbolic(&len, sizeof(len))) {
-      size_t upper_size = s2e_get_upper_bound(len);
-      p2 = (mrb->allocf)(mrb, p, upper_size, mrb->allocf_ud);
+      upper_size = s2e_get_upper_bound(len);
   } else {
 #endif
-      p2 = (mrb->allocf)(mrb, p, len, mrb->allocf_ud);
-#ifdef MRUBY_SYMBEX
+      upper_size = len;
+#ifdef SYMBEX_BUFFER_CONCRETE
   }
 #endif
+  p2 = (mrb->allocf)(mrb, p, upper_size, mrb->allocf_ud);
+
   if (!p2 && len > 0 && mrb->gc.heaps) {
     mrb_full_gc(mrb);
-    p2 = (mrb->allocf)(mrb, p, len, mrb->allocf_ud);
+    p2 = (mrb->allocf)(mrb, p, upper_size, mrb->allocf_ud);
   }
 
   return p2;

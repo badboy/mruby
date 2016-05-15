@@ -55,7 +55,7 @@ num_pow(mrb_state *mrb, mrb_value x)
   mrb_get_args(mrb, "o", &y);
   yv = mrb_to_flo(mrb, y);
   d = pow(mrb_to_flo(mrb, x), yv);
-  if (mrb_fixnum_p(x) && mrb_fixnum_p(y) && FIXABLE(d) && yv > 0 && 
+  if (mrb_fixnum_p(x) && mrb_fixnum_p(y) && FIXABLE(d) && yv > 0 &&
       (d < 0 || (d > 0 && (mrb_int)d > 0)))
     return mrb_fixnum_value((mrb_int)d);
   return mrb_float_value(mrb, d);
@@ -281,7 +281,7 @@ flo_eq(mrb_state *mrb, mrb_value x)
 static mrb_value
 flo_hash(mrb_state *mrb, mrb_value num)
 {
-#ifdef MRUBY_SYMBEX
+#ifdef SYMBEX_HASH_NEUTRAL
   return mrb_fixnum_value(0);
 #else
   mrb_float d;
