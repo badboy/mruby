@@ -22,6 +22,35 @@
 #include "value_array.h"
 #include <mruby/throw.h>
 
+#ifdef MRUBY_SYMBEX
+
+#include <mruby/opcode_names.h>
+#include <s2e.h>
+
+#define _SYMBEX_TRACE_SIZE   1
+
+typedef struct {
+    uint32_t op_code;
+    uint32_t frame_count;
+    uint32_t frames[_SYMBEX_TRACE_SIZE];
+} __attribute__((packed)) symbex_TraceUpdate;
+
+static symbex_TraceUpdate trace_update;
+
+static int report_trace(mrb_code pc) {
+    trace_update.op_code = GET_OPCODE(pc);
+    trace_update.frame_count = _SYMBEX_TRACE_SIZE;
+    trace_update.frames[0] = (uintptr_t)pc;
+
+    if (s2e_invoke_plugin("InterpreterMonitor", (void*)&trace_update,
+                sizeof(symbex_TraceUpdate)) != 0) {
+        return -1;
+    }
+
+    return 0;
+}
+#endif
+
 #ifndef MRB_DISABLE_STDIO
 #if defined(__cplusplus)
 extern "C" {
@@ -723,9 +752,17 @@ argnum_error(mrb_state *mrb, mrb_int num)
 #define DIRECT_THREADED
 #endif
 
+#ifdef MRUBY_SYMBEX
+#undef DIRECT_THREADED
+#endif
+
 #ifndef DIRECT_THREADED
 
+#ifdef MRUBY_SYMBEX
+#define INIT_DISPATCH(code) for (;;) { i = *pc; CODE_FETCH_HOOK(mrb, irep, pc, regs); code; switch (GET_OPCODE(i)) {
+#else
 #define INIT_DISPATCH for (;;) { i = *pc; CODE_FETCH_HOOK(mrb, irep, pc, regs); switch (GET_OPCODE(i)) {
+#endif
 #define CASE(op) case op:
 #define NEXT pc++; break
 #define JUMP break
@@ -811,7 +848,15 @@ RETRY_TRY_BLOCK:
   mrb->c->ci->nregs = irep->nregs;
   regs = mrb->c->stack;
 
+#ifdef MRUBY_SYMBEX
+  INIT_DISPATCH({
+      report_trace(i);
+      printf("DISPATCH. OPCODE i=%d, name=%s\n", GET_OPCODE(i), opcode_names[GET_OPCODE(i)]);
+  }) {
+#else
   INIT_DISPATCH {
+#endif
+
     CASE(OP_NOP) {
       /* do nothing */
       NEXT;

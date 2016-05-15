@@ -194,7 +194,7 @@ EOS
 
       mrbc_build = MRuby.targets['host']
       gems.each { |v| mrbc_build = self if v.name == 'mruby-bin-mrbc' }
-      @mrbcfile = mrbc_build.exefile("#{mrbc_build.build_dir}/bin/mrbc")
+      @mrbcfile = mrbc_build.exefile("#{mrbc_build.build_dir}/bin/mrbc.native")
     end
 
     def compilers
