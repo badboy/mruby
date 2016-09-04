@@ -23,3 +23,4 @@ cscope.out
 /mruby-source-*.gem
 doc/api
 .yardoc
+libarray.a

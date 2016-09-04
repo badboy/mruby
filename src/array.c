@@ -74,15 +74,7 @@ mrb_ary_new(mrb_state *mrb)
  * see also http://togetter.com/li/462898
  *
  */
-static inline void
-array_copy(mrb_value *dst, const mrb_value *src, mrb_int size)
-{
-  mrb_int i;
-
-  for (i = 0; i < size; i++) {
-    dst[i] = src[i];
-  }
-}
+/* implement in Rust now */
 
 MRB_API mrb_value
 mrb_ary_new_from_values(mrb_state *mrb, mrb_int size, const mrb_value *vals)
